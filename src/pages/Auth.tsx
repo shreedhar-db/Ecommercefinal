@@ -3,7 +3,7 @@ import { useAuth } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
 import { Eye, EyeOff, Loader2, Mail, Lock, User as UserIcon, SkipForward } from 'lucide-react';
 
-export default function Auth() {
+export default function Auth({ onSkip }: { onSkip?: () => void }) {
   const { signIn, signUp } = useAuth();
   const { navigate } = useRouter();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -39,7 +39,11 @@ export default function Auth() {
   };
 
   const handleSkip = () => {
-    navigate('home');
+    if (onSkip) {
+      onSkip();
+    } else {
+      navigate('home');
+    }
   };
 
   return (

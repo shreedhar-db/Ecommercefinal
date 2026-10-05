@@ -166,7 +166,10 @@ export default function Account() {
 
           {/* Sign Out */}
           <button
-            onClick={() => signOut().then(() => navigate('auth'))}
+            onClick={() => {
+              sessionStorage.removeItem('shopora_guest_skipped');
+              signOut().then(() => navigate('auth'));
+            }}
             className="flex items-center gap-2 text-sm font-semibold text-error bg-error/[0.06] border border-error/20 rounded-md px-4 py-3 hover:bg-error/10 transition-colors w-fit"
           >
             <LogOut size={18} />

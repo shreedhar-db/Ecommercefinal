@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { RouterProvider, useRouter } from '@/lib/router';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { CartProvider } from '@/lib/cart';
@@ -20,17 +21,10 @@ import About from '@/pages/About';
 import Info from '@/pages/Info';
 import { Loader2 } from 'lucide-react';
 
+const GUEST_KEY = 'shopora_guest_skipped';
+
 function Routes() {
   const { path } = useRouter();
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-light">
-        <Loader2 size={32} className="animate-spin text-primary-accent" />
-      </div>
-    );
-  }
 
   const parts = path.split('/').filter(Boolean);
   const route = parts[0] || 'home';
@@ -38,8 +32,6 @@ function Routes() {
   switch (route) {
     case 'home':
       return <Home />;
-    case 'auth':
-      return <Auth />;
     case 'shop':
       return <Shop />;
     case 'category':
@@ -72,18 +64,19 @@ function Routes() {
 }
 
 function AppShell() {
-  const { path } = useRouter();
+  const { path, navigate } = useRouter();
   const { user, loading } = useAuth();
+  const [guestSkipped, setGuestSkipped] = useState(() => sessionStorage.getItem(GUEST_KEY) === 'true');
 
   const parts = path.split('/').filter(Boolean);
   const route = parts[0] || 'home';
   const isOnAuthPage = route === 'auth';
 
-  // Show login page first when:
-  // - not still loading auth state
-  // - user is not logged in
-  // - user hasn't explicitly skipped (navigated to any non-auth page)
-  const showLoginPage = !loading && !user && (route === 'home' && parts.length <= 1) && !isOnAuthPage;
+  const handleSkip = () => {
+    sessionStorage.setItem(GUEST_KEY, 'true');
+    setGuestSkipped(true);
+    navigate('home');
+  };
 
   if (loading) {
     return (
@@ -93,15 +86,36 @@ function AppShell() {
     );
   }
 
-  if (showLoginPage) {
-    return <Auth />;
+  // Already logged in: never show login page, go straight to site
+  if (user) {
+    if (isOnAuthPage) {
+      return (
+        <div className="min-h-screen flex flex-col bg-white">
+          <Header />
+          <main className="flex-1">
+            <Home />
+          </main>
+          <Footer />
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <Header />
+        <main className="flex-1">
+          <Routes />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
-  // If already logged in and on the auth page, go straight to home
-  if (user && isOnAuthPage) {
-    return <Home />;
+  // Not logged in: show login page first unless guest skipped
+  if (!guestSkipped) {
+    return <Auth onSkip={handleSkip} />;
   }
 
+  // Guest browsing the site
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
