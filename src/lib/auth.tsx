@@ -80,18 +80,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadProfile]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message || null };
-  }, []);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    if (data.user) {
+      setUser({ id: data.user.id, email: data.user.email || '' });
+      setLoading(false);
+      loadProfile(data.user.id);
+    }
+    return { error: null };
+  }, [loadProfile]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: fullName } },
     });
-    return { error: error?.message || null };
-  }, []);
+    if (error) return { error: error.message };
+    if (data.user) {
+      setUser({ id: data.user.id, email: data.user.email || '' });
+      setLoading(false);
+      loadProfile(data.user.id);
+    }
+    return { error: null };
+  }, [loadProfile]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
