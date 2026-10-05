@@ -106,7 +106,7 @@ export default function Header() {
                   <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-black to-primary-accent flex items-center justify-center text-white text-xs font-bold">
-                    {profile?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'G'}
+                    {profile?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'}
                   </div>
                 )}
                 <span className="hidden lg:inline text-sm font-medium">{user ? 'Account' : 'Sign In'}</span>

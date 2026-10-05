@@ -76,11 +76,7 @@ export default function Home() {
                 Explore Collection
               </button>
             </div>
-            <div className="flex items-center gap-2 text-[11px] md:text-xs text-text-tertiary flex-wrap">
-              <span className="text-success">Free shipping on orders over \u20B9999</span>
-              <span>\u2022</span>
-              <span>30-day money-back guarantee</span>
-            </div>
+
           </div>
 
           <div className="relative w-full aspect-[3/2] lg:h-[464px] bg-bg-light rounded-xl overflow-hidden shadow-lg lg:shadow-xl">
