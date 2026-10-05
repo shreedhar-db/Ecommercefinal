@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
-import { Eye, EyeOff, Loader2, Mail, Lock, User as UserIcon, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, User as UserIcon, SkipForward } from 'lucide-react';
 
 export default function Auth() {
   const { signIn, signUp } = useAuth();
@@ -25,7 +25,7 @@ export default function Auth() {
         setError(error);
         setLoading(false);
       } else {
-        navigate('account');
+        navigate('home');
       }
     } else {
       const { error } = await signIn(email, password);
@@ -33,22 +33,18 @@ export default function Auth() {
         setError(error);
         setLoading(false);
       } else {
-        navigate('account');
+        navigate('home');
       }
     }
   };
 
-  return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-bg-light py-12 px-4">
-      <div className="w-full max-w-md">
-        <button
-          onClick={() => navigate('home')}
-          className="flex items-center gap-2 text-sm font-semibold text-primary-black mb-6 hover:text-primary-accent transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to Home
-        </button>
+  const handleSkip = () => {
+    navigate('home');
+  };
 
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-bg-light py-12 px-4">
+      <div className="w-full max-w-md">
         <div className="bg-white border border-border rounded-xl p-6 md:p-8 shadow-sm">
           {/* Logo */}
           <div className="flex items-center justify-center gap-2 mb-6">
@@ -120,22 +116,31 @@ export default function Auth() {
               className="bg-primary-black text-white rounded-md py-3 text-sm font-semibold transition-all hover:bg-primary-accent disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-2"
             >
               {loading && <Loader2 size={18} className="animate-spin" />}
-              {mode === 'login' ? 'Sign In' : 'Create Account'}
+              {mode === 'login' ? 'Login' : 'Register'}
             </button>
-          </form>
 
-          <p className="text-sm text-center mt-6 text-text-tertiary">
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+            {/* Register toggle button */}
             <button
+              type="button"
               onClick={() => {
                 setMode(mode === 'login' ? 'signup' : 'login');
                 setError(null);
               }}
-              className="text-primary-accent font-semibold hover:underline"
+              className="bg-white border border-border rounded-md py-3 text-sm font-semibold text-primary-black transition-all hover:bg-bg-light min-h-[44px]"
             >
-              {mode === 'login' ? 'Sign Up' : 'Sign In'}
+              {mode === 'login' ? 'Register' : 'Back to Login'}
             </button>
-          </p>
+
+            {/* Skip button */}
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="text-sm font-medium text-text-tertiary hover:text-primary-accent transition-colors flex items-center justify-center gap-2 py-2"
+            >
+              <SkipForward size={16} />
+              Skip — Continue as Guest
+            </button>
+          </form>
         </div>
       </div>
     </div>

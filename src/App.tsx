@@ -72,6 +72,36 @@ function Routes() {
 }
 
 function AppShell() {
+  const { path } = useRouter();
+  const { user, loading } = useAuth();
+
+  const parts = path.split('/').filter(Boolean);
+  const route = parts[0] || 'home';
+  const isOnAuthPage = route === 'auth';
+
+  // Show login page first when:
+  // - not still loading auth state
+  // - user is not logged in
+  // - user hasn't explicitly skipped (navigated to any non-auth page)
+  const showLoginPage = !loading && !user && (route === 'home' && parts.length <= 1) && !isOnAuthPage;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-bg-light">
+        <Loader2 size={32} className="animate-spin text-primary-accent" />
+      </div>
+    );
+  }
+
+  if (showLoginPage) {
+    return <Auth />;
+  }
+
+  // If already logged in and on the auth page, go straight to home
+  if (user && isOnAuthPage) {
+    return <Home />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
