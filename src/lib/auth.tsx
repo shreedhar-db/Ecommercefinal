@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateProfile: (data: Partial<Profile>) => Promise<{ error: string | null }>;
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => ({ error: 'not implemented' }),
   signUp: async () => ({ error: 'not implemented' }),
+  signInWithGoogle: async () => ({ error: 'not implemented' }),
   signOut: async () => {},
   refreshProfile: async () => {},
   updateProfile: async () => ({ error: 'not implemented' }),
@@ -105,6 +107,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   }, [loadProfile]);
 
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/',
+      },
+    });
+    return { error: error?.message || null };
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -122,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, loadProfile]);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, refreshProfile, updateProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signInWithGoogle, signOut, refreshProfile, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
