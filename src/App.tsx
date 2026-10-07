@@ -110,8 +110,8 @@ function AppShell() {
     );
   }
 
-  // Not logged in: show login page first unless guest skipped
-  if (!guestSkipped) {
+  // Not logged in: show login page if explicitly on auth page OR on first visit (not yet skipped)
+  if (isOnAuthPage || !guestSkipped) {
     return <Auth onSkip={handleSkip} />;
   }
 
