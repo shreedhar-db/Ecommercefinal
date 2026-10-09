@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
 import { Eye, EyeOff, Loader2, Mail, Lock, User as UserIcon, SkipForward } from 'lucide-react';
@@ -14,6 +14,17 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
+    const oauthError = params.get('error_description') || hashParams.get('error_description') || params.get('error') || hashParams.get('error');
+
+    if (!oauthError) return;
+
+    const message = decodeURIComponent(oauthError.replace(/\+/g, ' '));
+    setError(message.toLowerCase().includes('cancel') ? 'Google sign-in was cancelled.' : message);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -36,12 +47,18 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
   const handleGoogle = async () => {
     setError(null);
     setGoogleLoading(true);
-    const result = await signInWithGoogle();
-    if (result.error) {
-      const message = result.error.toLowerCase().includes('unsupported provider')
-        ? 'Google sign-in is not enabled yet. Please use email sign-in or enable Google in the project authentication settings.'
-        : result.error;
-      setError(message);
+
+    try {
+      const result = await signInWithGoogle();
+      if (result.error) {
+        const message = result.error.toLowerCase().includes('unsupported provider')
+          ? 'Google sign-in is not enabled yet. Enable Google in the project authentication settings, then add your Google Client ID, Client Secret, and the Supabase callback URL shown there.'
+          : result.error;
+        setError(message);
+        setGoogleLoading(false);
+      }
+    } catch {
+      setError('Google sign-in could not be started. Please try again or use email sign-in.');
       setGoogleLoading(false);
     }
   };
