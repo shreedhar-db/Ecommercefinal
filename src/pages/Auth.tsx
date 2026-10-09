@@ -38,7 +38,10 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
     setGoogleLoading(true);
     const result = await signInWithGoogle();
     if (result.error) {
-      setError(result.error);
+      const message = result.error.toLowerCase().includes('unsupported provider')
+        ? 'Google sign-in is not enabled yet. Please use email sign-in or enable Google in the project authentication settings.'
+        : result.error;
+      setError(message);
       setGoogleLoading(false);
     }
   };
