@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
 import { Eye, EyeOff, Loader2, Mail, Lock, User as UserIcon, SkipForward } from 'lucide-react';
 
 export default function Auth({ onSkip }: { onSkip?: () => void }) {
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp } = useAuth();
   const { navigate } = useRouter();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -12,19 +12,7 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
-    const oauthError = params.get('error_description') || hashParams.get('error_description') || params.get('error') || hashParams.get('error');
-
-    if (!oauthError) return;
-
-    const message = decodeURIComponent(oauthError.replace(/\+/g, ' '));
-    setError(message.toLowerCase().includes('cancel') ? 'Google sign-in was cancelled.' : message);
-  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -42,25 +30,6 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
     }
 
     navigate('home');
-  };
-
-  const handleGoogle = async () => {
-    setError(null);
-    setGoogleLoading(true);
-
-    try {
-      const result = await signInWithGoogle();
-      if (result.error) {
-        const message = result.error.toLowerCase().includes('unsupported provider')
-          ? 'Google sign-in is not enabled yet. Enable Google in the project authentication settings, then add your Google Client ID, Client Secret, and the Supabase callback URL shown there.'
-          : result.error;
-        setError(message);
-        setGoogleLoading(false);
-      }
-    } catch {
-      setError('Google sign-in could not be started. Please try again or use email sign-in.');
-      setGoogleLoading(false);
-    }
   };
 
   const handleSkip = () => {
@@ -85,29 +54,6 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={loading || googleLoading}
-              className="w-full bg-white border border-border rounded-md py-3 text-sm font-semibold text-primary-black transition-all hover:bg-bg-light disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-3 shadow-sm"
-            >
-              {googleLoading ? <Loader2 size={18} className="animate-spin" /> : (
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-              )}
-              Continue with Google
-            </button>
-
-            <div className="flex items-center gap-3 my-1">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[11px] text-text-tertiary font-medium uppercase tracking-wide">or</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
             {mode === 'signup' && (
               <div className="relative">
                 <UserIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
@@ -130,7 +76,7 @@ export default function Auth({ onSkip }: { onSkip?: () => void }) {
 
             {error && <div className="text-sm text-error bg-error/10 rounded-md px-4 py-3">{error}</div>}
 
-            <button type="submit" disabled={loading || googleLoading} className="bg-primary-black text-white rounded-md py-3 text-sm font-semibold transition-all hover:bg-primary-accent disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-2">
+            <button type="submit" disabled={loading} className="bg-primary-black text-white rounded-md py-3 text-sm font-semibold transition-all hover:bg-primary-accent disabled:opacity-50 min-h-[44px] flex items-center justify-center gap-2">
               {loading && <Loader2 size={18} className="animate-spin" />}
               {mode === 'login' ? 'Login' : 'Register'}
             </button>
