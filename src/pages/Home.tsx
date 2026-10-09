@@ -140,7 +140,7 @@ export default function Home() {
                 className="group bg-white border border-border rounded-xl overflow-hidden text-left transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="aspect-[16/9] bg-bg-light overflow-hidden">
-                  <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover" />
+                  <img src={cat.name.toLowerCase().includes('beauty') ? 'https://images.pexels.com/photos/25361525/pexels-photo-25361525.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' : cat.image_url} alt={cat.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="p-4 lg:p-6">
                   <h3 className="text-base lg:text-lg font-semibold mb-1">{cat.name}</h3>
